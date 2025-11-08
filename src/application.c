@@ -1,0 +1,88 @@
+#include "raylib.h"
+#include "math.h"
+
+int screenWidth = 1280;
+int screenHeight = 720;
+
+// Blueprint Color Scheme
+Color RoyaleBlue = {48, 87, 225};
+Color LavanderBlue = {206, 216, 247};
+Color ResolutionBlue = {0, 32, 130};
+
+void draw_margins(){
+    DrawRectangle(0, 0, screenWidth, 5, BLUE);
+    DrawRectangle(0, 5, 5, screenHeight - 10, BLUE);
+    DrawRectangle(screenWidth - 5, 5, 5, screenHeight - 10, BLUE);
+    DrawRectangle(0, screenHeight - 5, screenWidth, 5, BLUE);
+}
+
+void App()
+{
+    // Initialization
+    //--------------------------------------------------------------------------------------
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+    InitWindow(screenWidth, screenHeight, "SDF Mec Sim");
+
+    Camera2D camera = { 0 };
+    camera.target = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
+
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
+        // Update
+        //----------------------------------------------------------------------------------
+
+        // Uses log scaling to provide consistent zoom speed
+        camera.zoom = expf(logf(camera.zoom) + ((float)GetMouseWheelMove()*0.1f));
+        
+        // Camera zoom controls
+        if (camera.zoom > 3.0f) camera.zoom = 3.0f;
+        else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+
+        // Camera reset (zoom and rotation)
+        if (IsKeyPressed(KEY_R))
+        {
+            camera.zoom = 1.0f;
+        }
+        //----------------------------------------------------------------------------------
+
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+            ClearBackground(RoyaleBlue);
+            
+            if (IsWindowResized() && !IsWindowFullscreen())
+            {
+                screenWidth = GetScreenWidth();
+                screenHeight = GetScreenHeight();
+                camera.target = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+                camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+            }
+
+            BeginMode2D(camera);
+                // Camera code
+
+            EndMode2D();
+
+            // bordi
+            draw_margins();
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
+
+    return;
+}
