@@ -4,8 +4,13 @@ CFLAGS=-Wall -O2
 SRC_DIR=src
 BUILD_DIR=build
 INCL_DIR=include
-RAYLIB_INCL_DIR=raylib/include
-RAYLIB_LIB_DIR=raylib/lib
+ifeq ($(OS),Windows_NT)
+	RAYLIB_INCL_DIR=raylib/include
+ 	RAYLIB_LIB_DIR=raylib/lib
+else
+	RAYLIB_INCL_DIR=raylib_linux/include
+	RAYLIB_LIB_DIR=raylib_linux/lib
+endif
 
 # Find source files
 SRCS=$(wildcard $(SRC_DIR)/*.c)
@@ -18,7 +23,11 @@ LIBRARY_PATH_FLAGS=-L$(RAYLIB_LIB_DIR)
 
 # Libraries to link
 # Use -lraylib (for libraylib.a or raylib.dll import lib) plus necessary Win32 libs
-LIBS=-lraylib -lopengl32 -lgdi32 -lwinmm
+ifeq ($(OS),Windows_NT)
+	LIBS=-lraylib -lopengl32 -lgdi32 -lwinmm
+else
+	LIBS=-lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+endif
 
 # Default target
 all: sim
@@ -35,5 +44,14 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
+
 clean:
-	@del /Q /F $(BUILD_DIR)\*.o*
+ifeq ($(OS),Windows_NT)
+	@echo Cleaning Windows build files...
+	@del /Q /F $(BUILD_DIR)\*.o 2>nul || echo No files to delete.
+	@if exist $(BUILD_DIR) rmdir /S /Q $(BUILD_DIR)
+else
+	@echo Cleaning Linux build files...
+	@rm -rf $(BUILD_DIR)/*.o
+	@rm -r sim 2>nul || echo No files to delete. 
+endif
