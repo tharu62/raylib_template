@@ -49,7 +49,7 @@ clean:
 ifeq ($(OS),Windows_NT)
 	@echo Cleaning Windows build files...
 	@del /Q /F $(BUILD_DIR)\*.o 2>nul || echo No files to delete.
-	@if exist $(BUILD_DIR) rmdir /S /Q $(BUILD_DIR)
+	@del /Q /F sim.exe 2>nul || echo No files to delete. 
 else
 	@echo Cleaning Linux build files...
 	@rm -rf $(BUILD_DIR)/*.o
