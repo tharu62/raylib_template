@@ -6,11 +6,11 @@ BUILD_DIR = build
 INCL_DIR = include
 
 ifeq ($(OS),Windows_NT)
-	RAYLIB_INCL_DIR = raylib/include
-	RAYLIB_LIB_DIR = raylib/lib
+	RAYLIB_INCL_DIR = raylib/raylib_windows/include
+	RAYLIB_LIB_DIR = raylib/raylib_windows/lib
 else
-	RAYLIB_INCL_DIR = raylib_linux/include
-	RAYLIB_LIB_DIR = raylib_linux/lib
+	RAYLIB_INCL_DIR = raylib/raylib_linux/include
+	RAYLIB_LIB_DIR = raylib/raylib_linux/lib
 endif
 
 # Find source files
@@ -30,10 +30,10 @@ else
 endif
 
 # Default target
-all: sim
+all: app
 
 # Link executable
-sim: $(OBJS)
+app: $(OBJS)
 ifeq ($(OS),Windows_NT)
 	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(LIBRARY_PATH_FLAGS) -o $@ $^ $(LIBS)
 else
@@ -48,14 +48,21 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
+run:
+ifeq ($(OS),Windows_NT)
+	@app.exe
+else
+	@./app 
+endif	
+
 # Clean target
 clean:
 ifeq ($(OS),Windows_NT)
 	@echo Cleaning Windows build files...
 	@del /Q /F $(BUILD_DIR)\*.o 2>nul || echo No files to delete.
-	@del /Q /F sim.exe 2>nul || echo No files to delete.
+	@del /Q /F app.exe 2>nul || echo No files to delete.
 else
 	@echo Cleaning Linux build files...
 	@rm -rf $(BUILD_DIR)/*.o
-	@rm -f sim 2>/dev/null || echo No files to delete.
+	@rm -f app 2>/dev/null || echo No files to delete.
 endif
